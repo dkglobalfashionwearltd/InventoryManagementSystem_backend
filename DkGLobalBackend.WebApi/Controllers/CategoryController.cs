@@ -1,7 +1,6 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
@@ -228,6 +227,73 @@ namespace DkGLobalBackend.WebApi.Controllers
                 return respose;
             }
 
+        }
+
+        [HttpPost]
+        [Route("update-status")]
+        public async Task<ApiResponse> UpdateStatusItem(UpdateStatusDto itemDto, CancellationToken cancellationToken)
+        {
+            var respose = new ApiResponse();
+            try
+            {
+                if (itemDto.Id <= 0)
+                {
+                    respose.StatusCode = HttpStatusCode.BadRequest;
+                    respose.Success = false;
+                    respose.Message = "Id Not Found";
+                    return respose;
+                }
+                var genericReq = new GenericServiceRequest<Category>
+                {
+                    Expression = x => x.CategoryId == itemDto.Id,
+                    IncludeProperties = null,
+                    Tracked = true,
+                    CancellationToken = cancellationToken
+                };
+                var result = await _serviceManager.Categories.GetAsync(genericReq);
+
+                if (result == null)
+                {
+                    respose.StatusCode = HttpStatusCode.NotFound;
+                    respose.Success = false;
+                    respose.Message = "Not Found";
+                    return respose;
+                }
+
+                result.Status = itemDto.Status ?? result.Status;
+
+
+                _serviceManager.Categories.Update(result);
+                var res = await _serviceManager.Save();
+                if (res < 1)
+                {
+                    respose.StatusCode = HttpStatusCode.InternalServerError;
+                    respose.Success = false;
+                    respose.Message = "Failed to update status";
+                    return respose;
+                }
+                else
+                {
+                    respose.StatusCode = HttpStatusCode.OK;
+                    respose.Success = true;
+                    respose.Message = "Status Updated Successfully";
+                    return respose;
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                respose.StatusCode = HttpStatusCode.RequestTimeout;
+                respose.Success = false;
+                respose.Message = ex.Message;
+                return respose;
+            }
+            catch (Exception ex)
+            {
+                respose.StatusCode = HttpStatusCode.InternalServerError;
+                respose.Success = false;
+                respose.Message = ex.Message;
+                return respose;
+            }
         }
 
         [HttpDelete]

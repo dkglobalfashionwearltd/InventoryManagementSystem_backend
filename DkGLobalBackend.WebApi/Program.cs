@@ -2,9 +2,11 @@
 using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Services;
 using DkGLobalBackend.WebApi.Services.IServices;
+using DkGLobalBackend.WebApi.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -39,6 +41,10 @@ builder.Services.AddScoped<IChecker, Checker>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<InventoryDbContext>()
     .AddDefaultTokenProviders();
+// Add services
+
+// Add AutoMapper
+//builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

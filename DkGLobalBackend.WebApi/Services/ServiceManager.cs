@@ -31,6 +31,7 @@ namespace DkGLobalBackend.WebApi.Services
             Auth = new AuthService(_db, _userManager, _roleManager,_secretKey
                 );
             AssignItemUsers = new AssignItemService(_db);
+           
         }
 
         public async Task<int> Save()
