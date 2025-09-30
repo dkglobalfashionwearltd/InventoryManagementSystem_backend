@@ -26,13 +26,6 @@ builder.Services.AddHealthChecks();
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("LiveConnectionString"),
     new MySqlServerVersion(new Version("9.4.0"))
-    //options =>
-    //{
-    //    options.EnableRetryOnFailure(
-    //        maxRetryCount: 5,          // retry up to 5 times
-    //        maxRetryDelay: TimeSpan.FromSeconds(10), // wait up to 10s between retries
-    //        errorNumbersToAdd: null);  // let EF decide which errors are transient
-    //}
     ));
 
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
@@ -42,6 +35,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<InventoryDbContext>()
     .AddDefaultTokenProviders();
 // Add services
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5276); // HTTP
+    options.ListenLocalhost(7189, listenOptions => listenOptions.UseHttps());
+});
 
 // Add AutoMapper
 //builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
