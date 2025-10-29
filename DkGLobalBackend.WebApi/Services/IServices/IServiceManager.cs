@@ -9,5 +9,6 @@
         public IItemUser ItemUsers { get; }
         public IAuth Auth { get; }
         public IAssignItem AssignItemUsers { get; }
+        public IStock Stocks { get; }
     }
 }

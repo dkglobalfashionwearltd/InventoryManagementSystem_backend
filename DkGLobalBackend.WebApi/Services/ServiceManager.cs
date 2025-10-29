@@ -13,6 +13,7 @@ namespace DkGLobalBackend.WebApi.Services
         public IItemUser ItemUsers {  get; private set; }
         public IAuth Auth {  get; private set; }
         public IAssignItem AssignItemUsers {  get; private set; }
+        public IStock Stocks {  get; private set; }
 
         private readonly InventoryDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -31,6 +32,7 @@ namespace DkGLobalBackend.WebApi.Services
             Auth = new AuthService(_db, _userManager, _roleManager,_secretKey
                 );
             AssignItemUsers = new AssignItemService(_db);
+            Stocks =new StockService(_db);
            
         }
 

@@ -35,11 +35,17 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<InventoryDbContext>()
     .AddDefaultTokenProviders();
 // Add services
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenLocalhost(5276); // HTTP
-    options.ListenLocalhost(7189, listenOptions => listenOptions.UseHttps());
-});
+// Add HTTPS redirection service (optional config)
+//builder.Services.AddHttpsRedirection(options =>
+//{
+//    options.HttpsPort = 4200; // your HTTPS port
+//});
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenLocalhost(5276); // HTTP
+//    options.ListenLocalhost(7189, listenOptions => listenOptions.UseHttps());
+//    options.ListenAnyIP(4200, listenOptions => listenOptions.UseHttps());
+//});
 
 // Add AutoMapper
 //builder.Services.AddAutoMapper(typeof(AutoMapperProfile));

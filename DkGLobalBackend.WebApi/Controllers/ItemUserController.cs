@@ -203,7 +203,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                 result.Name = (itemDto.Name == "" || itemDto.Name == null) ?  result.Name : itemDto.Name;  
                 result.OfficeId = itemDto.OfficeId <= 0 ? result.OfficeId : itemDto.OfficeId;
                 result.PhoneNumber = itemDto.PhoneNumber ?? result.PhoneNumber;
-                result.Designation = itemDto.PhoneNumber ?? result.Designation;
+                result.Designation = itemDto.Designation ?? result.Designation;
                 result.Status = itemDto.Status ?? result.Status;
                 result.DepartmentId = itemDto.DepartmentId;
                
