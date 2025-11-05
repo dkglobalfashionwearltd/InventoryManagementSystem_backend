@@ -1,11 +1,9 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace DkGLobalBackend.WebApi.Controllers
 {
@@ -23,20 +21,14 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("getall")]
-        public async Task<ApiResponse> GetAllStock(string model, CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetAllStock( CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(model))
-            {
-                response.Success = false;
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.Message = "Model number required";
-                return response;
-            }
 
             try
             {
                 var data = await _serviceManager.Stocks.GetAllAsync(new GenericServiceRequest<Stock>
                 {
+                    IncludeProperties = "Item",
                     Tracked = true,
                     CancellationToken = cancellationToken
                 });
@@ -48,10 +40,25 @@ namespace DkGLobalBackend.WebApi.Controllers
                     return response;
                 }
 
+                var dataToDisplay = data.Select(x => new
+                {
+                    StockId = x.Id,
+                    x.ItemId,
+                    ItemName = x.Item.Name,
+                    ItemModel = x.Item.ModelNumber,
+                    x.TotalGivenQuantity,
+                    x.LastQuantity,
+                    x.CurrentQuantity,
+                    StockedAt = x.CreatedAt,
+                    LastStockedAt = x.UpdatedAt,
+                    x.StockOutAt,
+                    x.StockCount
+                });
+
                 response.Success = true;
                 response.StatusCode = HttpStatusCode.OK;
                 response.Message = "Successful";
-                response.Result = data;
+                response.Result = dataToDisplay;
                 return response;
             }
             catch (TaskCanceledException ex)
@@ -87,7 +94,7 @@ namespace DkGLobalBackend.WebApi.Controllers
             {
                 var data = await _serviceManager.Stocks.GetAsync(new GenericServiceRequest<Stock>
                 {
-                    Expression = x => x.ModelNumber == model,
+                    Expression = x => x.Item.ModelNumber == model,
                     Tracked = true,
                     CancellationToken = cancellationToken
                 });
@@ -99,10 +106,25 @@ namespace DkGLobalBackend.WebApi.Controllers
                     return response;
                 }
 
+                var dataToDisplay = new
+                {
+                    StockId = data.Id,
+                    data.ItemId,
+                    ItemName = data.Item.Name,
+                    ItemModel = data.Item.ModelNumber,
+                    data.TotalGivenQuantity,
+                    data.LastQuantity,
+                    data.CurrentQuantity,
+                    StockedAt = data.CreatedAt,
+                    LastStockedAt = data.UpdatedAt,
+                    data.StockOutAt,
+                    data.StockCount
+                };
+
                 response.Success = true;
                 response.StatusCode = HttpStatusCode.OK;
                 response.Message = "Successful";
-                response.Result = data;
+                response.Result = dataToDisplay;
                 return response;
             }
             catch (TaskCanceledException ex)
@@ -135,29 +157,34 @@ namespace DkGLobalBackend.WebApi.Controllers
 
             try
             {
-                // 1️⃣ Validate the item exists
-                var item = await _serviceManager.Items.GetAsync(new GenericServiceRequest<Item>
+                Item itemData = new();
+                Stock existingStock = new();
+                // Validate the stock exists
+                if (req.ModelNumber != null)
                 {
-                    Expression = x => x.ModelNumber == req.ModelNumber,
-                    CancellationToken = cancellationToken
-                });
-
-                if (item == null)
+                    existingStock = await _serviceManager.Stocks.GetAsync(new GenericServiceRequest<Stock>
+                    {
+                        Expression = x => x.Item.ModelNumber == req.ModelNumber,
+                        CancellationToken = cancellationToken
+                    });
+                }
+                // Validate the item&stock exists
+                if (req.ItemId > 0)
                 {
-                    response.Success = false;
-                    response.StatusCode = HttpStatusCode.NotFound;
-                    response.Message = "Item not found.";
-                    return response;
+                    itemData = await _serviceManager.Items.GetAsync(new GenericServiceRequest<Item>
+                    {
+                        Expression = x => x.ItemId == req.ItemId,
+                        CancellationToken = cancellationToken
+                    });
+                    existingStock = await _serviceManager.Stocks.GetAsync(new GenericServiceRequest<Stock>
+                    {
+                        Expression = x => x.Item.ItemId == req.ItemId,
+                        CancellationToken = cancellationToken
+                    });
                 }
 
-                // 2️⃣ Get existing stock (if any)
-                var existingStock = await _serviceManager.Stocks.GetAsync(new GenericServiceRequest<Stock>
-                {
-                    Expression = x => x.ModelNumber == req.ModelNumber,
-                    CancellationToken = cancellationToken
-                });
 
-                // 3️⃣ Perform stock action
+                // Perform stock action
                 switch (req.ActionType.ToLower())
                 {
                     case "create":
@@ -168,17 +195,27 @@ namespace DkGLobalBackend.WebApi.Controllers
                             response.Message = "Stock already exists for this item.";
                             return response;
                         }
-
+                        if (itemData == null)
+                        {
+                            response.Success = false;
+                            response.StatusCode = HttpStatusCode.NotFound;
+                            response.Message = "Item not found.";
+                            return response;
+                        }
+                        
                         var newStock = new Stock
                         {
-                            ModelNumber = req.ModelNumber,
-                            Quantity = req.Quantity,
+                            ItemId = req.ItemId,
+                            TotalGivenQuantity = req.Quantity,
+                            LastQuantity = req.Quantity,
+                            CurrentQuantity = req.Quantity,
+                            StockCount = 1,
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now,
                             IsDeleted = false
                         };
                         await _serviceManager.Stocks.AddAsync(newStock);
-                        response.Message = "Stock created successfully.";
+                        response.Message = "Item stocked successfully.";
                         break;
 
                     case "plus":
@@ -190,7 +227,10 @@ namespace DkGLobalBackend.WebApi.Controllers
                             return response;
                         }
 
-                        existingStock.Quantity += req.Quantity;
+                        existingStock.TotalGivenQuantity += req.Quantity;
+                        existingStock.LastQuantity = req.Quantity;
+                        existingStock.CurrentQuantity += req.Quantity;
+                        existingStock.StockCount++;
                         existingStock.UpdatedAt = DateTime.Now;
                         _serviceManager.Stocks.Update(existingStock);
                         response.Message = "Stock increased successfully.";
@@ -205,27 +245,58 @@ namespace DkGLobalBackend.WebApi.Controllers
                             return response;
                         }
 
-                        existingStock.Quantity -= req.Quantity;
-                        if (existingStock.Quantity < 0)
-                            existingStock.Quantity = 0;
+                        existingStock.CurrentQuantity -= req.Quantity;
+                        if (existingStock.CurrentQuantity <= 0)
+                            existingStock.CurrentQuantity = 0;
+                            existingStock.StockOutAt = DateTime.Now;
 
-                        existingStock.UpdatedAt = DateTime.Now;
                         _serviceManager.Stocks.Update(existingStock);
                         response.Message = "Stock decreased successfully.";
+                        break;
+                    case "deactivate":
+                        if (existingStock == null)
+                        {
+                            response.Success = false;
+                            response.StatusCode = HttpStatusCode.NotFound;
+                            response.Message = "No existing stock found to deactivate.";
+                            return response;
+                        }
+
+                        existingStock.IsDeleted = true;
+                        existingStock.DeletedAt = DateTime.Now;
+                        _serviceManager.Stocks.Update(existingStock);
+                        response.Message = "Stock deactivated successfully.";
+                        break;
+                    case "delete":
+                        if (existingStock == null)
+                        {
+                            response.Success = false;
+                            response.StatusCode = HttpStatusCode.NotFound;
+                            response.Message = "No existing stock found to deactivate.";
+                            return response;
+                        }
+                        _serviceManager.Stocks.Remove(existingStock);
+                        response.Message = "Stock deleted successfully.";
                         break;
 
                     default:
                         response.Success = false;
                         response.StatusCode = HttpStatusCode.BadRequest;
-                        response.Message = "Invalid ActionType. Use 'create', 'plus', or 'minus'.";
+                        response.Message = "Invalid ActionType. Use 'create', 'deactivate', 'delete', 'plus', or 'minus'.";
                         return response;
                 }
 
-                // 4️⃣ Save changes
+                // Save changes
                 int result = await _serviceManager.Save();
                 response.Success = result > 0;
                 response.StatusCode = HttpStatusCode.OK;
-
+                return response;
+            }
+            catch(TaskCanceledException ex)
+            {
+                response.Success = false;
+                response.StatusCode = HttpStatusCode.RequestTimeout;
+                response.Message = ex.Message;
                 return response;
             }
             catch (Exception ex)
@@ -236,9 +307,6 @@ namespace DkGLobalBackend.WebApi.Controllers
                 return response;
             }
         }
-
-
-
 
     }
 }

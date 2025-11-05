@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DkGLobalBackend.WebApi.Models
 {
@@ -6,13 +7,20 @@ namespace DkGLobalBackend.WebApi.Models
     {
         [Key]
         public int Id { get; set; }
-        public string ModelNumber { get; set; }
-        public int Quantity { get; set; }
+        public int ItemId { get; set; }
+        [ForeignKey("ItemId")]
+        public Item Item { get; set; }
+
+        public int TotalGivenQuantity { get; set; }
+        public int LastQuantity { get; set; }
+        public int CurrentQuantity { get; set; }
+        public int StockCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public DateTime StockOutAt { get; set; }
 
-        public bool IsDeleted { get; set; }
+        //soft delete
+        public bool IsDeleted { get; set; } = false;
         public DateTime DeletedAt { get; set; }
-        public int DeletedBy { get; set; }
     }
 }
