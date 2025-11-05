@@ -183,7 +183,6 @@ namespace DkGLobalBackend.WebApi.Controllers
                     });
                 }
 
-
                 // Perform stock action
                 switch (req.ActionType.ToLower())
                 {
@@ -215,6 +214,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                             IsDeleted = false
                         };
                         await _serviceManager.Stocks.AddAsync(newStock);
+                        await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Item stocked successfully.";
                         break;
 
@@ -233,6 +233,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                         existingStock.StockCount++;
                         existingStock.UpdatedAt = DateTime.Now;
                         _serviceManager.Stocks.Update(existingStock);
+                        await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Stock increased successfully.";
                         break;
 
@@ -251,6 +252,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                             existingStock.StockOutAt = DateTime.Now;
 
                         _serviceManager.Stocks.Update(existingStock);
+                        await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Stock decreased successfully.";
                         break;
                     case "deactivate":
@@ -265,6 +267,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                         existingStock.IsDeleted = true;
                         existingStock.DeletedAt = DateTime.Now;
                         _serviceManager.Stocks.Update(existingStock);
+                        await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Stock deactivated successfully.";
                         break;
                     case "delete":
@@ -276,6 +279,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                             return response;
                         }
                         _serviceManager.Stocks.Remove(existingStock);
+                        await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Stock deleted successfully.";
                         break;
 
@@ -305,6 +309,32 @@ namespace DkGLobalBackend.WebApi.Controllers
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 response.Message = ex.Message;
                 return response;
+            }
+        }
+
+        private async Task<bool> AddHistory(string id,string actionName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var userData = await _serviceManager.Auth.GetAsync(new GenericServiceRequest<ApplicationUser>
+                {
+                    Expression = x=>x.Id == id,
+                    Tracked = true,
+                    CancellationToken = cancellationToken
+                });
+                var dataToAddHistory = new History
+                {
+                    ActionTitle = actionName,
+                    ActionBysId = id,
+                    ActionBysName = userData.UserName ?? "",
+                    ActionAt = DateTime.Now,
+                };
+                await _serviceManager.Histories.AddAsync(dataToAddHistory);
+                int i = await _serviceManager.Save();
+                return i > 0;
+            }catch (Exception ex)
+            {
+                return false;
             }
         }
 
