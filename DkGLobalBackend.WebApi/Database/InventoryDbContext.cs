@@ -17,6 +17,7 @@ namespace DkGLobalBackend.WebApi.Database
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<AssignItemUser> AssignItemUser => Set<AssignItemUser>();
         public DbSet<Stock> Stocks => Set<Stock>();
+        public DbSet<History> Histories => Set<History>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

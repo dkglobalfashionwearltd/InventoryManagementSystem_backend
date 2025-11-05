@@ -14,6 +14,7 @@ namespace DkGLobalBackend.WebApi.Services
         public IAuth Auth {  get; private set; }
         public IAssignItem AssignItemUsers {  get; private set; }
         public IStock Stocks {  get; private set; }
+        public IHistory Histories {  get; private set; }
 
         private readonly InventoryDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -33,6 +34,7 @@ namespace DkGLobalBackend.WebApi.Services
                 );
             AssignItemUsers = new AssignItemService(_db);
             Stocks =new StockService(_db);
+            Histories =new HistoryService(_db);
            
         }
 

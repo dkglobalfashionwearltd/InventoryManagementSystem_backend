@@ -10,5 +10,6 @@
         public IAuth Auth { get; }
         public IAssignItem AssignItemUsers { get; }
         public IStock Stocks { get; }
+        public IHistory Histories { get; }
     }
 }
