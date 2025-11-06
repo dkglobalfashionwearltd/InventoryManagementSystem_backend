@@ -4,7 +4,6 @@
     {
         public string Name { get; set; }
         public string ModelNumber { get; set; }
-        public string SerialNumber { get; set; }
         public string BrandName { get; set; }
         public int Price { get; set; }
         public DateOnly PurchaseDate { get; set; }
@@ -19,8 +18,6 @@
         public string ServiceProviderPhoneNumber { get; set; }
 
         public string Status { get; set; }
-        public string ItemCondition { get; set; }
-        public string Quantity { get; set; }
         public DateOnly WarrantyEnd { get; set; }
 
 

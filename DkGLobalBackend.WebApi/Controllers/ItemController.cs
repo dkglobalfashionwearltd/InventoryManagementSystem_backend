@@ -136,7 +136,6 @@ namespace DkGLobalBackend.WebApi.Controllers
                 {
                     Name = itemDto.Name,
                     ModelNumber = itemDto.ModelNumber,
-                    SerialNumber = itemDto.SerialNumber,
                     BrandName = itemDto.BrandName,
                     Price = itemDto.Price,
                     PurchaseDate = itemDto.PurchaseDate,
@@ -148,9 +147,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                     ServiceProviderPhoneNumber = itemDto.ServiceProviderPhoneNumber,
                     Status = itemDto.Status,
                     CategoryId = itemDto.CategoryId,
-                    ItemCondition = itemDto.ItemCondition,
                     WarrantyEnd = itemDto.WarrantyEnd,
-                    Quantity = itemDto.Quantity,
                 };
                 await _serviceManager.Items.AddAsync(itemToCreate);
                 var res = await _serviceManager.Save();

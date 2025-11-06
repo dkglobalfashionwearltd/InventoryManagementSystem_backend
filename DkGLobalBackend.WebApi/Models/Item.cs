@@ -10,7 +10,6 @@ namespace DkGLobalBackend.WebApi.Models
         public int ItemId { get; set; }
         public string Name { get; set; }
         public string ModelNumber { get; set; }
-        public string SerialNumber { get; set; }
         public string BrandName { get; set; }
         public int Price { get; set; }
         public DateOnly PurchaseDate { get; set; }
@@ -26,8 +25,6 @@ namespace DkGLobalBackend.WebApi.Models
         public string ServiceProviderPhoneNumber { get; set; }
 
         public string Status { get; set; }
-        public string ItemCondition { get; set; }
-        public string Quantity { get; set; }
 
 
         public int CategoryId { get; set; }
