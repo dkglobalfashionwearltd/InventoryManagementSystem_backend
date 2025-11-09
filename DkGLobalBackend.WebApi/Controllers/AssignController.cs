@@ -49,7 +49,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                         au.Item.Name,
                         CategoryName = au.Item.Category.Name,
                         au.AssignedDate,
-                        au.AssignTimeCondition,
+                        au.Remarks,
                         au.AssignAgainstTo,
                         au.Status
                     }).ToList()
@@ -85,20 +85,6 @@ namespace DkGLobalBackend.WebApi.Controllers
             }
         }
 
-        //public async Task<string> GetDepartmentName(int userId, CancellationToken cancellationToken)
-        //{
-        //    var departmentData = await _serviceManager.ItemUsers.GetAsync(new GenericServiceRequest<ItemUser>
-        //    {
-        //        Expression = x => x.ItemUserId == userId,
-        //        IncludeProperties = "Department",
-        //        Tracked = false,
-        //        CancellationToken = cancellationToken
-        //    });
-
-        //    return departmentData.Department.Name;
-        //}
-
-       
         [HttpPost]
         [Route("item-user")]
         public async Task<ApiResponse> AssignItemUser(AssignItemUserDto dto, CancellationToken cancellationToken)
@@ -111,14 +97,14 @@ namespace DkGLobalBackend.WebApi.Controllers
                 response.Message = "At least one ItemId and one ItemUserId are required.";
                 return response;
             }
-           
+
             try
             {
                 // create 
 
-                foreach (var itemId in dto.ItemIds) 
+                foreach (var itemId in dto.ItemIds)
                 {
-                    foreach (var userId in dto.ItemUserIds) 
+                    foreach (var userId in dto.ItemUserIds)
                     {
                         var exists = await _serviceManager.AssignItemUsers.AnyAsync(new GenericServiceRequest<AssignItemUser>
                         {
@@ -134,9 +120,9 @@ namespace DkGLobalBackend.WebApi.Controllers
                                 ItemId = int.Parse(itemId),
                                 ItemUserId = int.Parse(userId),
                                 AssignedDate = dto.AssignedDate,
-                                AssignTimeCondition = dto.AssignTimeCondition,
-                                AssignAgainstTo = int.Parse(dto.AssignAgainstTo),
-                                Status = dto.Status,
+                                Remarks = dto.Remarks,
+                                AssignAgainstTo = int.Parse(dto.AssignAgainstTo ?? "0"),
+                                Status = "active",
                             });
                         }
                     }
@@ -148,7 +134,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                 response.Success = true;
                 response.Message = "Assignment(s) successful.";
                 return response;
-                
+
 
             }
             catch (TaskCanceledException ex)

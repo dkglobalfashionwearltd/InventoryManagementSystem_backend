@@ -145,14 +145,14 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("user/get")]
-        public async Task<ApiResponse> GetUserInfo(string UserId, CancellationToken cancellationToken)
+        public async Task<ApiResponse> GetUserInfo(string userId, CancellationToken cancellationToken)
         {
             var response = new ApiResponse();
             try
             {
                 var genericReq = new GenericServiceRequest<ApplicationUser>
                 {
-                    Expression = x=>x.Id == UserId,
+                    Expression = x=>x.Id == userId,
                     IncludeProperties = null,
                     Tracked = true,
                     CancellationToken = cancellationToken

@@ -159,16 +159,7 @@ namespace DkGLobalBackend.WebApi.Controllers
             {
                 Item itemData = new();
                 Stock existingStock = new();
-                // Validate the stock exists
-                if (req.ModelNumber != null)
-                {
-                    existingStock = await _serviceManager.Stocks.GetAsync(new GenericServiceRequest<Stock>
-                    {
-                        Expression = x => x.Item.ModelNumber == req.ModelNumber,
-                        CancellationToken = cancellationToken
-                    });
-                }
-                // Validate the item&stock exists
+
                 if (req.ItemId > 0)
                 {
                     itemData = await _serviceManager.Items.GetAsync(new GenericServiceRequest<Item>
@@ -181,6 +172,13 @@ namespace DkGLobalBackend.WebApi.Controllers
                         Expression = x => x.Item.ItemId == req.ItemId,
                         CancellationToken = cancellationToken
                     });
+                }
+                else
+                {
+                    response.Success = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.Message = "Item Id Required.";
+                    return response;
                 }
 
                 // Perform stock action
@@ -201,7 +199,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                             response.Message = "Item not found.";
                             return response;
                         }
-                        
+
                         var newStock = new Stock
                         {
                             ItemId = req.ItemId,
@@ -211,6 +209,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                             StockCount = 1,
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now,
+                            StockOutAt = null,
                             IsDeleted = false
                         };
                         await _serviceManager.Stocks.AddAsync(newStock);
@@ -232,6 +231,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                         existingStock.CurrentQuantity += req.Quantity;
                         existingStock.StockCount++;
                         existingStock.UpdatedAt = DateTime.Now;
+                        existingStock.StockOutAt = null;
                         _serviceManager.Stocks.Update(existingStock);
                         await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
                         response.Message = "Stock increased successfully.";
@@ -248,8 +248,10 @@ namespace DkGLobalBackend.WebApi.Controllers
 
                         existingStock.CurrentQuantity -= req.Quantity;
                         if (existingStock.CurrentQuantity <= 0)
+                        {
                             existingStock.CurrentQuantity = 0;
                             existingStock.StockOutAt = DateTime.Now;
+                        }
 
                         _serviceManager.Stocks.Update(existingStock);
                         await AddHistory(req.ActionBy, $"Stock {req.ActionType}", cancellationToken);
@@ -322,6 +324,10 @@ namespace DkGLobalBackend.WebApi.Controllers
                     Tracked = true,
                     CancellationToken = cancellationToken
                 });
+                if(userData == null)
+                {
+                    return false;
+                }
                 var dataToAddHistory = new History
                 {
                     ActionTitle = actionName,
@@ -330,8 +336,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                     ActionAt = DateTime.Now,
                 };
                 await _serviceManager.Histories.AddAsync(dataToAddHistory);
-                int i = await _serviceManager.Save();
-                return i > 0;
+                return true;
             }catch (Exception ex)
             {
                 return false;

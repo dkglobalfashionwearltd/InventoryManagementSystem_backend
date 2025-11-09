@@ -17,7 +17,7 @@ namespace DkGLobalBackend.WebApi.Models
         public int StockCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public DateTime StockOutAt { get; set; }
+        public DateTime? StockOutAt { get; set; }
 
         //soft delete
         public bool IsDeleted { get; set; } = false;

@@ -9,7 +9,7 @@
         public ItemUser ItemUser { get; set; }
 
         public DateOnly AssignedDate { get; set; }
-        public string AssignTimeCondition { get; set; }
+        public string? Remarks { get; set; }
         public int? AssignAgainstTo { get; set; }
         public string Status { get; set; }
     }

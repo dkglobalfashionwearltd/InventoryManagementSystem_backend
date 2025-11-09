@@ -1,11 +1,8 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DkGLobalBackend.WebApi.Controllers
 {
@@ -145,7 +142,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                     NextServicingDate = itemDto.NextServicingDate,
                     ServiceProviderName = itemDto.ServiceProviderName,
                     ServiceProviderPhoneNumber = itemDto.ServiceProviderPhoneNumber,
-                    Status = itemDto.Status,
+                    Status = "active",
                     CategoryId = itemDto.CategoryId,
                     WarrantyEnd = itemDto.WarrantyEnd,
                 };
@@ -209,10 +206,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
                 result.Name = (itemDto.Name == "" || itemDto.Name == null) ?  result.Name : itemDto.Name;
                 result.ModelNumber = (itemDto.ModelNumber == "" || itemDto.ModelNumber == null) ? result.ModelNumber : itemDto.ModelNumber;
-                result.SerialNumber = itemDto.SerialNumber ?? result.SerialNumber;
                 result.BrandName = itemDto.BrandName ?? result.BrandName;
-                result.ItemCondition = itemDto.ItemCondition ?? result.ItemCondition;
-                result.Quantity = itemDto.Quantity ?? result.Quantity;
                 result.Price = itemDto.Price == 0 ? result.Price : itemDto.Price;
                 result.PurchaseDate = itemDto.PurchaseDate.ToString() == null ? result.PurchaseDate : itemDto.PurchaseDate;
                 result.WarrantyEnd = itemDto.WarrantyEnd.ToString() == null ? result.WarrantyEnd : itemDto.WarrantyEnd;
@@ -222,7 +216,6 @@ namespace DkGLobalBackend.WebApi.Controllers
                 result.NextServicingDate = itemDto.NextServicingDate.ToString() == null ? result.NextServicingDate : result.NextServicingDate;
                 result.ServiceProviderName = itemDto.ServiceProviderName ?? result.ServiceProviderName;
                 result.ServiceProviderPhoneNumber = itemDto.ServiceProviderPhoneNumber ?? result.ServiceProviderPhoneNumber;
-                result.Status = itemDto.Status ?? result.Status;
                 result.CategoryId = itemDto.CategoryId;
                 
                 _serviceManager.Items.Update(result);
