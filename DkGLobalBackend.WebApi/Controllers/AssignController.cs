@@ -2,6 +2,7 @@
 using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -23,6 +24,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllAssignItemUser(CancellationToken cancellationToken)
         {
             var response = new ApiResponse();
@@ -87,6 +89,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("item-user")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> AssignItemUser(AssignItemUserDto dto, CancellationToken cancellationToken)
         {
             var response = new ApiResponse();

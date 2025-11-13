@@ -1,6 +1,7 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -11,13 +12,16 @@ namespace DkGLobalBackend.WebApi.Controllers
     public class ItemController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
-        public ItemController(IServiceManager serviceManager)
+        private readonly IStockService _stockService;
+        public ItemController(IServiceManager serviceManager, IStockService stockService)
         {
             _serviceManager = serviceManager;
+            _stockService = stockService;
         }
 
         [HttpGet]
         [Route("getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllItem(CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -64,6 +68,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("get")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetItem(int ItemId,CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -117,7 +122,8 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("create")]
-        public async Task<ApiResponse> CreateItem(ItemDto itemDto)
+        [Authorize(Roles = "admin")]
+        public async Task<ApiResponse> CreateItem(ItemDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
             try
@@ -147,6 +153,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                     WarrantyEnd = itemDto.WarrantyEnd,
                 };
                 await _serviceManager.Items.AddAsync(itemToCreate);
+                Console.WriteLine("item id" + itemToCreate.ItemId);
                 var res = await _serviceManager.Save();
                 if(res < 1)
                 {
@@ -157,9 +164,17 @@ namespace DkGLobalBackend.WebApi.Controllers
                 }
                 else
                 {
+                    CreateAndUpdateStockDto toStock = new()
+                    {
+                        ItemId = itemToCreate.ItemId,
+                        Quantity = itemDto.Quantity,
+                        ActionType = "create",
+                        ActionBy = itemDto.UserId
+                    };
+                    var re = await _stockService.ManageStockAsync(toStock, cancellationToken);
                     respose.StatusCode = HttpStatusCode.Created;
                     respose.Success = true;
-                    respose.Message = "Created Successfully";
+                    respose.Message = $"Created Successfully and {re.Message}";
                     return respose;
                 }
             }
@@ -175,6 +190,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateItem(ItemUpdateDto itemDto,CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -253,6 +269,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update-status")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateStatusItem(UpdateStatusDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -320,6 +337,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpDelete]
         [Route("delete")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> DeleteItem(int ItemId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();

@@ -1,6 +1,7 @@
 ﻿using DkGLobalBackend.WebApi.Database;
 using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace DkGLobalBackend.WebApi.Services
@@ -19,18 +20,20 @@ namespace DkGLobalBackend.WebApi.Services
         private readonly InventoryDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly string _secretKey;
-        public ServiceManager(InventoryDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public ServiceManager(InventoryDbContext db, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _db = db;
             _secretKey = configuration["TokenSetting:SecretKey"] ?? "";
             _userManager = userManager;
             _roleManager = roleManager;
+            _httpContextAccessor = httpContextAccessor;
             Items =new ItemService(_db);
             Categories =new CategoryService(_db);
             Departments =new DepartmentService(_db);
             ItemUsers =new ItemUserService(_db);
-            Auth = new AuthService(_db, _userManager, _roleManager,_secretKey
+            Auth = new AuthService(_db, _userManager, _roleManager,_secretKey, _httpContextAccessor
                 );
             AssignItemUsers = new AssignItemService(_db);
             Stocks =new StockService(_db);

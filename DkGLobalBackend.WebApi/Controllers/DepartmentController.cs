@@ -1,6 +1,7 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -18,6 +19,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllDepartment(CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -64,6 +66,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("get")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetDepartment(int DepartmentId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -117,6 +120,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("create")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> CreateDepartment(DepartmentDto itemDto)
         {
             var respose = new ApiResponse();
@@ -163,6 +167,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateDepartment(DepartmentUpdateDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -229,6 +234,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpDelete]
         [Route("delete")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> DeleteDepartment(int DepartmentId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();

@@ -8,6 +8,9 @@ namespace DkGLobalBackend.WebApi.Services.IServices
     {
         bool IsUniqueUser(string phoneNumber);
         Task<ApiResponse> Login(string username, string password);
+        Task<ApiResponse> LoginNew(LoginReq req);
+        Task<ApiResponse> Refresh();
+        Task<ApiResponse> Logout();
         Task<ApiResponse> Registration(ApplicationUserReq req);
         void Update(ApplicationUser user);
     }

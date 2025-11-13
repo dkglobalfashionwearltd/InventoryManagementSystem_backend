@@ -1,6 +1,7 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -21,6 +22,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllItemUser(CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -67,6 +69,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("get")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetItemUser(int ItemUserId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -120,6 +123,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("create")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> CreateItemUser(ItemUserDto itemDto)
         {
             var respose = new ApiResponse();
@@ -171,6 +175,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateItemUser(ItemUserUpdateDto itemDto,CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -243,6 +248,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update-status")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateStatusItemUser(UpdateStatusDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -310,6 +316,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpDelete]
         [Route("delete")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> DeleteItemUser(int ItemUserId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();

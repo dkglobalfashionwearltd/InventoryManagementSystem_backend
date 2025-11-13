@@ -26,9 +26,9 @@ namespace DkGLobalBackend.WebApi.Controllers
             var response = new ApiResponse();
             if (username != null && username != "" && password != null && password != "")
             {
-               
-                    response = await _serviceManager.Auth.Login(username, password);
-                    return response;
+
+                response = await _serviceManager.Auth.Login(username, password);
+                return response;
 
             }
             else
@@ -41,14 +41,41 @@ namespace DkGLobalBackend.WebApi.Controllers
         }
 
         [HttpPost]
+        [Route("user/login-new")]
+        public async Task<ApiResponse> NewLoginReq(LoginReq req)
+        {
+            var response = await _serviceManager.Auth.LoginNew(req);
+            return response;
+
+        }
+
+        [HttpPost]
+        [Route("user/refresh-token")]
+        public async Task<ApiResponse> RefreshToken()
+        {
+            var response = await _serviceManager.Auth.Refresh();
+            return response;
+
+        }
+
+        [HttpPost]
+        [Route("user/logout")]
+        public async Task<ApiResponse> Logout()
+        {
+            var response = await _serviceManager.Auth.Logout();
+            return response;
+
+        }
+
+        [HttpPost]
         [Route("user/registration")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> Registration(ApplicationUserReq request)
         {
             var response = new ApiResponse();
             string[] userRoles = { Roles.IT, Roles.STORE, Roles.USER };
             var pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            var isEmailValid =  Regex.IsMatch(request.Email, pattern, RegexOptions.IgnoreCase);
+            var isEmailValid = Regex.IsMatch(request.Email, pattern, RegexOptions.IgnoreCase);
             if (request == null)
             {
                 response.Success = false;
@@ -105,6 +132,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("user/getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllUserInfo(CancellationToken cancellationToken)
         {
             var response = new ApiResponse();
@@ -118,7 +146,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                     CancellationToken = cancellationToken
                 };
                 var resultRes = await _serviceManager.Auth.GetAllAsync(genericReq);
-                if(resultRes == null)
+                if (resultRes == null)
                 {
                     response.StatusCode = HttpStatusCode.NotFound;
                     response.Success = false;
@@ -133,7 +161,7 @@ namespace DkGLobalBackend.WebApi.Controllers
                 return response;
 
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 response.Success = false;
@@ -145,6 +173,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("user/get")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetUserInfo(string userId, CancellationToken cancellationToken)
         {
             var response = new ApiResponse();
@@ -152,7 +181,7 @@ namespace DkGLobalBackend.WebApi.Controllers
             {
                 var genericReq = new GenericServiceRequest<ApplicationUser>
                 {
-                    Expression = x=>x.Id == userId,
+                    Expression = x => x.Id == userId,
                     IncludeProperties = null,
                     Tracked = true,
                     CancellationToken = cancellationToken
@@ -185,29 +214,30 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update-user-info")]
-        public async Task<ApiResponse> UpdateUserInfo(ApplicationUserUpdateReq req,CancellationToken cancellationToken)
+        [Authorize(Roles = "admin")]
+        public async Task<ApiResponse> UpdateUserInfo(ApplicationUserUpdateReq req, CancellationToken cancellationToken)
         {
             var response = new ApiResponse();
             try
             {
-                if(req.UserId == null)
+                if (req.UserId == null)
                 {
-                    response.StatusCode=HttpStatusCode.BadRequest;
-                    response.Success=false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.Success = false;
                     response.Message = "Id Not Found";
                     return response;
                 }
                 var userData = await _serviceManager.Auth.GetAsync(new GenericServiceRequest<ApplicationUser>
                 {
-                    Expression = x=>x.Id == req.UserId,
+                    Expression = x => x.Id == req.UserId,
                     IncludeProperties = null,
                     Tracked = false,
                     CancellationToken = cancellationToken
                 });
-                if(userData == null)
+                if (userData == null)
                 {
-                    response.StatusCode=HttpStatusCode.NotFound;
-                    response.Success=false;
+                    response.StatusCode = HttpStatusCode.NotFound;
+                    response.Success = false;
                     response.Message = "Data Not Found";
                     return response;
                 }
@@ -222,14 +252,15 @@ namespace DkGLobalBackend.WebApi.Controllers
                 return response;
 
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
 
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 response.Success = false;
-                response.Message = ex.InnerException?.Message != null ? ex.InnerException.Message :  ex.Message;
+                response.Message = ex.InnerException?.Message != null ? ex.InnerException.Message : ex.Message;
                 return response;
             }
-           
+
         }
     }
 }

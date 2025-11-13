@@ -1,6 +1,7 @@
 ﻿using DkGLobalBackend.WebApi.Models;
 using DkGLobalBackend.WebApi.Models.RequestDto;
 using DkGLobalBackend.WebApi.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("getall")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetAllCategory(CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -65,6 +67,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpGet]
         [Route("get")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> GetCategory(int CategoryId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -119,6 +122,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("create")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> CreateCategory(CategoryDto itemDto)
         {
             var respose = new ApiResponse();
@@ -165,6 +169,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateCategory(CategoryUpdateDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -231,6 +236,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("update-status")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> UpdateStatusItem(UpdateStatusDto itemDto, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
@@ -298,6 +304,7 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpDelete]
         [Route("delete")]
+        [Authorize(Roles = "admin")]
         public async Task<ApiResponse> DeleteCategory(int CategoryId, CancellationToken cancellationToken)
         {
             var respose = new ApiResponse();
