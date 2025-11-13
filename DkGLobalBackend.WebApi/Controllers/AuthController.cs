@@ -21,23 +21,10 @@ namespace DkGLobalBackend.WebApi.Controllers
 
         [HttpPost]
         [Route("user/login")]
-        public async Task<ApiResponse> LoginReq(string username, string password)
+        public async Task<ApiResponse> LoginReq(LoginReq req)
         {
-            var response = new ApiResponse();
-            if (username != null && username != "" && password != null && password != "")
-            {
-
-                response = await _serviceManager.Auth.Login(username, password);
-                return response;
-
-            }
-            else
-            {
-                response.Success = false;
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.Message = "Username or password is incorrect";
-                return response;
-            }
+            var response = await _serviceManager.Auth.Login(req);
+            return response;
         }
 
         [HttpPost]
@@ -53,7 +40,7 @@ namespace DkGLobalBackend.WebApi.Controllers
         [Route("user/refresh-token")]
         public async Task<ApiResponse> RefreshToken()
         {
-            var response = await _serviceManager.Auth.Refresh();
+            var response = await _serviceManager.Auth.RefreshNew();
             return response;
 
         }
@@ -62,7 +49,7 @@ namespace DkGLobalBackend.WebApi.Controllers
         [Route("user/logout")]
         public async Task<ApiResponse> Logout()
         {
-            var response = await _serviceManager.Auth.Logout();
+            var response = await _serviceManager.Auth.LogoutNew();
             return response;
 
         }

@@ -7,10 +7,12 @@ namespace DkGLobalBackend.WebApi.Services.IServices
     public interface IAuth : IServices<ApplicationUser>
     {
         bool IsUniqueUser(string phoneNumber);
-        Task<ApiResponse> Login(string username, string password);
+        Task<ApiResponse> Login(LoginReq req);
+
+        //.........
         Task<ApiResponse> LoginNew(LoginReq req);
-        Task<ApiResponse> Refresh();
-        Task<ApiResponse> Logout();
+        Task<ApiResponse> RefreshNew();
+        Task<ApiResponse> LogoutNew();
         Task<ApiResponse> Registration(ApplicationUserReq req);
         void Update(ApplicationUser user);
     }

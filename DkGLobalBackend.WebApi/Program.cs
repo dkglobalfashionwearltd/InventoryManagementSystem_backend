@@ -73,7 +73,7 @@ builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IDbInitializerService, DbInitializerService>();
 builder.Services.AddScoped<IChecker, Checker>();
 builder.Services.AddScoped<IStockService, StockMethodService>();
-builder.Services.AddHttpContextAccessor();
+//builder.Services.AddHttpContextAccessor();
 builder.Services.AddHealthChecks();
 
 // Identity
@@ -119,17 +119,24 @@ builder.Services.AddAuthentication(options =>
 });
 
 // ===== CORS =====
-var allowedOrigin = "https://localhost:5173";
+var allowedOrigin = "http://localhost:5173";
 var allowedLiveOrigin = "https://inventory-management-system-lyart.vercel.app";
 var allowedLiveApiOrigin = "https://inventory.cookiesoftwareltd.com:4200";
 var allowedLiveApiOrigin2 = "https://api.cookiesoftwareltd.com";
+var allowedLiveApiOrigin3 = "https://cookiesoftwareltd.com";
 
 builder.Services.AddCors(options =>
 {
     
     options.AddPolicy("AllowCors", policy =>
     {
-        policy.WithOrigins(allowedOrigin,allowedLiveOrigin, allowedLiveApiOrigin, allowedLiveApiOrigin2)
+        policy.WithOrigins(
+            allowedOrigin,
+            allowedLiveOrigin, 
+            allowedLiveApiOrigin, 
+            allowedLiveApiOrigin2,
+            allowedLiveApiOrigin3
+            )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

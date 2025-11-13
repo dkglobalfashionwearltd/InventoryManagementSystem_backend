@@ -46,16 +46,30 @@ namespace DkGLobalBackend.WebApi.Services
 
         }
 
-        public async Task<ApiResponse> Login(string username, string password)
+        public async Task<ApiResponse> Login(LoginReq req)
         {
             var response = new ApiResponse();
             var loginResponse = new LoginResponse();
-            
+
             try
             {
-                var user = _dbContext.ApplicationUsers?.FirstOrDefault(u => u.UserName.ToLower() == username.ToLower());
-                bool isValid = await _userManager.CheckPasswordAsync(user, password);
-                if(user == null || isValid == false)
+                if(req == null)
+                {
+                    response.Success = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.Message = "Username or password is incorrect";
+                    return response;
+                }
+                var user = _dbContext.ApplicationUsers?.FirstOrDefault(u => u.UserName.ToLower() == req.Username.ToLower());
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.Message = "Username or password is incorrect";
+                    return response;
+                }
+                bool isValid = await _userManager.CheckPasswordAsync(user, req.Password);
+                if(isValid == false)
                 {
                     response.Success = false;
                     response.StatusCode = HttpStatusCode.BadRequest;
@@ -66,6 +80,7 @@ namespace DkGLobalBackend.WebApi.Services
                 var roles = await _userManager.GetRolesAsync(user);
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_secretKey);
+                var tokenExpire = req.RememberMe ? DateTime.UtcNow.AddDays(10) : DateTime.UtcNow.AddMinutes(30);
 
                 var tokenDescription = new SecurityTokenDescriptor
                 {
@@ -75,7 +90,7 @@ namespace DkGLobalBackend.WebApi.Services
                         new Claim(ClaimTypes.Role, roles.FirstOrDefault())
 
                         ]),
-                    Expires = DateTime.UtcNow.AddDays(7),
+                    Expires = tokenExpire,
                     SigningCredentials = new(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature),
                 };
 
@@ -83,7 +98,8 @@ namespace DkGLobalBackend.WebApi.Services
 
                 loginResponse.UserId = user.Id;
                 loginResponse.Role = roles.FirstOrDefault();
-                //loginResponse.Token = tokenHandler.WriteToken(token);
+                loginResponse.Token = tokenHandler.WriteToken(token);
+                loginResponse.TokenExpire = tokenExpire;
 
                 response.Success = true;
                 response.StatusCode = HttpStatusCode.OK;
@@ -100,7 +116,7 @@ namespace DkGLobalBackend.WebApi.Services
                 return response;
             }
         }
-
+       
         public async Task<ApiResponse> LoginNew(LoginReq req)
         {
             var response = new ApiResponse();
@@ -223,7 +239,7 @@ namespace DkGLobalBackend.WebApi.Services
             }
         }
 
-        public async Task<ApiResponse> Logout()
+        public async Task<ApiResponse> LogoutNew()
         {
             var response = new ApiResponse();
 
@@ -290,7 +306,7 @@ namespace DkGLobalBackend.WebApi.Services
             }
         }
 
-        public async Task<ApiResponse> Refresh()
+        public async Task<ApiResponse> RefreshNew()
         {
             var response = new ApiResponse();
             var loginResponse = new LoginResponse();
